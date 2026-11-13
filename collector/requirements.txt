@@ -1,0 +1,4 @@
+asyncua==2.1.0
+fastapi==0.162.7
+uvicorn[standard]==0.54.0
+aiosqlite==0.22.1

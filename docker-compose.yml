@@ -1,0 +1,30 @@
+services:
+  opcua-source:
+    build: ./opcua-source
+    container_name: opcua-source
+    ports:
+      - "4840:4840"   # OPC UA
+      - "8081:8081"   # 故障注入控制口
+    volumes:
+      - source-data:/data
+    restart: unless-stopped
+
+  collector:
+    build: ./collector
+    container_name: collector
+    ports:
+      - "8000:8000"   # 采集 API + Swagger (/docs)
+    environment:
+      OPCUA_ENDPOINT: opc.tcp://opcua-source:4840
+      DATA_DIR: /data
+      BACKFILL_INTERVAL: "2.0"
+      HISTORY_PAGE_SIZE: "50"
+    volumes:
+      - collector-data:/data
+    depends_on:
+      - opcua-source
+    restart: unless-stopped
+
+volumes:
+  source-data:      # 源历史（SQLite），源重启不丢
+  collector-data:   # 采集状态与记录（SQLite），采集服务重启续采
